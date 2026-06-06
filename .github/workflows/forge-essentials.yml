@@ -32,13 +32,14 @@ jobs:
           ./build-package.sh -I -a aarch64 ndk-sysroot
           ./build-package.sh -I -a aarch64 libandroid-support
           ./build-package.sh -I -a aarch64 libandroid-glob
-          ./build-package.sh -I -a aarch64 libandroid-selinux
-          ./build-package.sh -I -a aarch64 libandroid-posix-semaphore
-          ./build-package.sh -I -a aarch64 libgmp
-          ./build-package.sh -I -a aarch64 pcre2
           ./build-package.sh -I -a aarch64 libbz2
           ./build-package.sh -I -a aarch64 liblzma
           ./build-package.sh -I -a aarch64 libmd
+          ./build-package.sh -I -a aarch64 libandroid-posix-semaphore
+          ./build-package.sh -I -a aarch64 libgmp
+          ./build-package.sh -I -a aarch64 libmpfr
+          ./build-package.sh -I -a aarch64 pcre2
+          ./build-package.sh -I -a aarch64 libandroid-selinux
           ./build-package.sh -I -a aarch64 libcap-ng
           
           # 2. Terminal UI Bedrock
