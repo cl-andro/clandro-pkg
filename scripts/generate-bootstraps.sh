@@ -24,7 +24,7 @@ TERMUX_PACKAGE_MANAGERS=("apt" "pacman")
 
 # The repository base urls mapping for package managers.
 declare -A REPO_BASE_URLS=(
-	["apt"]="https://packages-cf.termux.dev/apt/termux-main"
+	["apt"]="https://cl-andro.github.io/cl-andro-packages"
 	["pacman"]="https://sync.termux-pacman.dev/main"
 )
 

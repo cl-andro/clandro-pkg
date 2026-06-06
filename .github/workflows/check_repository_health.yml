@@ -9,7 +9,7 @@ permissions: {} # none
 
 jobs:
   check-repository-health:
-    if: github.repository == 'termux/termux-packages'
+    if: github.repository == 'cl-andro/clandro-pkg'
     runs-on: ubuntu-slim
     steps:
       - name: Clone repository
@@ -31,7 +31,7 @@ jobs:
           ./scripts/check-repository-health.js "${{ steps.generate-apt-packages-list.outputs.OUTPUT_DIR }}" | tee repository-health.txt
       - name: Create issue if health check fails
         env:
-          GITHUB_TOKEN: ${{ secrets.TERMUXBOT2_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.CL_ANDRO_PAT }}
         if: failure()
         run: |
           ISSUE_TITLE="Repository Health Check Failed"
@@ -50,4 +50,4 @@ jobs:
               --search "$ISSUE_TITLE in:title type:issue" \
               --json number | jq -r '.[] | .number'
           )
-          gh issue create --title "$ISSUE_TITLE" --body "$ISSUE_BODY" --label "health-check" --assignee "thunder-coding"
+          gh issue create --title "$ISSUE_TITLE" --body "$ISSUE_BODY" --label "health-check"

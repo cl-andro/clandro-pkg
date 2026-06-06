@@ -12,20 +12,20 @@ jobs:
     permissions:
       issues: write
       contents: write
-    if: github.repository == 'termux/termux-packages'
+    if: github.repository == 'cl-andro/clandro-pkg'
     runs-on: ubuntu-slim
     steps:
       - name: Clone repository
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
-          token: ${{ secrets.TERMUXBOT2_TOKEN }}
+          token: ${{ secrets.CL_ANDRO_PAT }}
       - name: Revbump main/command-not-found
         env:
-          GITHUB_TOKEN: ${{ secrets.TERMUXBOT2_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.CL_ANDRO_PAT }}
         run: |
-          git config --global user.name "Termux Github Actions"
-          git config --global user.email "contact@termux.dev"
+          git config --global user.name "cl-andro-packages-bot"
+          git config --global user.email "bot@cl-andro.com"
 
           ./scripts/bin/revbump command-not-found
           git add .
