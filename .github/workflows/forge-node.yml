@@ -1,0 +1,128 @@
+name: Forge Node (The AI Engine)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-node:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/termux/package-builder:latest
+      options: --privileged
+    steps:
+      - name: Checkout Sovereign Code
+        uses: actions/checkout@v4
+
+      - name: Architect the Custom OS Directories
+        run: |
+          sudo mkdir -p /data/data/com.zk.clandro/files/usr
+          sudo chown -R builder:builder /data/data/com.zk.clandro
+
+      - name: Install NDK
+        run: |
+          export HOME=/home/builder
+          ./scripts/setup-android-sdk.sh
+
+      - name: Forge Core & Network Bedrock
+        run: |
+          export HOME=/home/builder
+          
+          # 1. THE GLUE (Crucial for Node.js Linkage)
+          ./build-package.sh -I -a aarch64 libc++
+          
+          # 2. Bedrock Infrastructure
+          ./build-package.sh -I -a aarch64 ndk-sysroot
+          ./build-package.sh -I -a aarch64 libandroid-support
+          ./build-package.sh -I -a aarch64 libiconv
+          ./build-package.sh -I -a aarch64 zlib
+          ./build-package.sh -I -a aarch64 openssl
+          ./build-package.sh -I -a aarch64 libnghttp2
+
+      - name: Forge V8 Engine Dependencies
+        run: |
+          export HOME=/home/builder
+          ./build-package.sh -I -a aarch64 c-ares
+          ./build-package.sh -I -a aarch64 libicu
+          ./build-package.sh -I -a aarch64 tcl
+          ./build-package.sh -I -a aarch64 ncurses
+          ./build-package.sh -I -a aarch64 readline
+          ./build-package.sh -I -a aarch64 libsqlite
+          ./build-package.sh -I -a aarch64 libuv
+
+      - name: Forge The AI Runtime (Node.js)
+        run: |
+          export HOME=/home/builder
+          
+          # Anti-Crash: Restrict the compiler to 2 processes to prevent RAM exhaustion
+          export TERMUX_MAKE_PROCESSES=2
+          
+          # Anti-Timeout: Start a background heartbeat to keep GitHub Actions alive
+          while true; do echo "[HEARTBEAT] Still forging the V8 Engine... $(date)"; sleep 120; done &
+          HEARTBEAT_PID=$!
+          
+          # Forge Node.js
+          ./build-package.sh -I -a aarch64 nodejs
+          
+          # Terminate heartbeat when complete
+          kill $HEARTBEAT_PID
+
+      - name: Inject NPM (The JavaScript Payload)
+        if: success()
+        run: |
+          echo "Packaging the official NPM files into a custom .deb..."
+          
+          # 1. Create the skeleton structure for the .deb suitcase
+          mkdir -p npm-payload/data/data/com.zk.clandro/files/usr/lib
+          mkdir -p npm-payload/data/data/com.zk.clandro/files/usr/bin
+          mkdir -p npm-payload/DEBIAN
+          
+          # 2. Download and extract the official Node tarball
+          wget https://nodejs.org/dist/v20.12.2/node-v20.12.2-linux-arm64.tar.xz
+          tar -xf node-v20.12.2-linux-arm64.tar.xz
+          
+          # 3. Move the node_modules folder into our suitcase
+          cp -r node-v20.12.2-linux-arm64/lib/node_modules npm-payload/data/data/com.zk.clandro/files/usr/lib/
+          
+          # 4. Generate the executable wrapper script directly inside the suitcase!
+          cat << 'EOF' > npm-payload/data/data/com.zk.clandro/files/usr/bin/npm
+          #!/data/data/com.zk.clandro/files/usr/bin/bash
+          exec node /data/data/com.zk.clandro/files/usr/lib/node_modules/npm/bin/npm-cli.js "$@"
+          EOF
+          chmod +x npm-payload/data/data/com.zk.clandro/files/usr/bin/npm
+          
+          # 5. Create the required Debian metadata file
+          cat << 'EOF' > npm-payload/DEBIAN/control
+          Package: npm-patch
+          Version: 1.0.0
+          Architecture: aarch64
+          Maintainer: Architect
+          Description: NPM JavaScript Payload for Cl-Andro
+          EOF
+          
+          # 6. Build the actual .deb file and drop it in the output folder
+          dpkg-deb --build npm-payload output/npm-patch_1:1.0.0_aarch64.deb
+
+      - name: Sanitize Artifact Filenames
+        if: success()
+        run: |
+          # Replace illegal colons (:) with underscores for NTFS/Windows compatibility
+          for f in output/*:*.deb; do
+            if [ -e "$f" ]; then
+              new_name=$(echo "$f" | tr ':' '_')
+              mv "$f" "$new_name"
+            fi
+          done
+
+      - name: The Autopsy
+        if: failure()
+        run: |
+          echo "========== CONFIG.LOG AUTOPSY START =========="
+          find /home/builder/.termux-build/ -name "config.log" -exec cat {} +
+          echo "========== CONFIG.LOG AUTOPSY END =========="
+
+      - name: Upload Artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cl-andro-node
+          path: output/*.deb

@@ -1,0 +1,109 @@
+name: Forge PRoot (The Sub-System)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-proot:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/termux/package-builder:latest
+      options: --privileged
+    steps:
+      - name: Checkout Sovereign Code
+        uses: actions/checkout@v4
+
+      - name: Architect the Custom OS Directories
+        run: |
+          sudo mkdir -p /data/data/com.zk.clandro/files/usr
+          sudo chown -R builder:builder /data/data/com.zk.clandro
+
+      - name: Install NDK
+        run: |
+          export HOME=/home/builder
+          ./scripts/setup-android-sdk.sh
+
+      - name: Forge The Bedrock (Compiler Initialization)
+        run: |
+          export HOME=/home/builder
+          
+          ./build-package.sh -I -a aarch64 ndk-sysroot
+          ./build-package.sh -I -a aarch64 libc++
+          ./build-package.sh -I -a aarch64 libandroid-support
+          ./build-package.sh -I -a aarch64 libiconv
+          ./build-package.sh -I -a aarch64 zlib
+          ./build-package.sh -I -a aarch64 openssl
+          ./build-package.sh -I -a aarch64 libnghttp2
+
+      - name: Forge PRoot & Distro Manager
+        run: |
+          export HOME=/home/builder
+          
+          # 1. The Core Security, Regex, & Android Hardware Layer
+          ./build-package.sh -I -a aarch64 pcre2
+          ./build-package.sh -I -a aarch64 attr
+          ./build-package.sh -I -a aarch64 libacl
+          ./build-package.sh -I -a aarch64 libandroid-glob
+          ./build-package.sh -I -a aarch64 libandroid-posix-semaphore
+          ./build-package.sh -I -a aarch64 libcap-ng
+          ./build-package.sh -I -a aarch64 libandroid-selinux
+          
+          # 2. The Terminal & Input Engine (MUST BE BUILT BEFORE GAWK/UTILS)
+          ./build-package.sh -I -a aarch64 ncurses
+          ./build-package.sh -I -a aarch64 readline
+          
+          # 3. The Core Compression Libraries
+          ./build-package.sh -I -a aarch64 libbz2
+          ./build-package.sh -I -a aarch64 liblzma
+          
+          # 4. Distro Manager Prerequisites (The Master Core Utilities)
+          ./build-package.sh -I -a aarch64 gawk
+          ./build-package.sh -I -a aarch64 file
+          ./build-package.sh -I -a aarch64 findutils
+          ./build-package.sh -I -a aarch64 grep
+          ./build-package.sh -I -a aarch64 sed
+          ./build-package.sh -I -a aarch64 unzip
+          ./build-package.sh -I -a aarch64 util-linux
+          ./build-package.sh -I -a aarch64 libssh2
+          ./build-package.sh -I -a aarch64 libnghttp3
+          ./build-package.sh -I -a aarch64 libngtcp2
+          ./build-package.sh -I -a aarch64 libcurl
+          
+          # 5. The Advanced System Foundations & Archivers
+          ./build-package.sh -I -a aarch64 bash
+          ./build-package.sh -I -a aarch64 libgmp
+          ./build-package.sh -I -a aarch64 coreutils
+          ./build-package.sh -I -a aarch64 gzip
+          ./build-package.sh -I -a aarch64 tar
+          
+          # 6. The PRoot Engine & Manager
+          ./build-package.sh -I -a aarch64 libtalloc
+          ./build-package.sh -I -a aarch64 proot
+          ./build-package.sh -I -a aarch64 proot-distro
+
+      - name: Sanitize Artifact Filenames
+        if: success()
+        run: |
+          for f in output/*:*.deb; do
+            if [ -e "$f" ]; then
+              new_name=$(echo "$f" | tr ':' '_')
+              mv "$f" "$new_name"
+            fi
+          done
+
+      - name: The Precision Autopsy
+        if: failure()
+        run: |
+          echo "========== CRASH ISOLATION START =========="
+          # Find the most recently modified config.log (the one that actually crashed)
+          CRASH_LOG=$(find /home/builder/.termux-build/ -name "config.log" -type f -printf '%T@ %p\n' | sort -n | tail -1 | cut -d' ' -f2-)
+          echo "Analyzing failed log at: $CRASH_LOG"
+          tail -n 100 "$CRASH_LOG"
+          echo "========== CRASH ISOLATION END =========="
+
+      - name: Upload Artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cl-andro-proot
+          path: output/*.deb

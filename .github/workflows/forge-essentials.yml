@@ -1,0 +1,74 @@
+name: Forge Essentials (aarch64)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-essentials:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/termux/package-builder:latest
+      options: --privileged
+    steps:
+      - name: Checkout Sovereign Code
+        uses: actions/checkout@v4
+
+      - name: Architect the Custom OS Directories
+        run: |
+          sudo mkdir -p /data/data/com.zk.clandro/files/usr
+          sudo mkdir -p /data/data/com.zk.clandro/files/home
+          sudo chown -R builder:builder /data/data/com.zk.clandro
+
+      - name: Install the C++ Compiler (The Missing NDK)
+        run: |
+          export HOME=/home/builder
+          ./scripts/setup-android-sdk.sh
+
+      - name: Forge Essentials (Surgical Execution)
+        run: |
+          export HOME=/home/builder
+          
+          # 1. Base NDK dependencies
+          ./build-package.sh -I -a aarch64 ndk-sysroot
+          ./build-package.sh -I -a aarch64 libandroid-support
+          ./build-package.sh -I -a aarch64 libiconv
+          ./build-package.sh -I -a aarch64 ncurses
+          
+          # 2. Termux Core Bedrock
+          ./build-package.sh -I -a aarch64 termux-core
+          ./build-package.sh -I -a aarch64 termux-exec
+          ./build-package.sh -I -a aarch64 termux-am
+          
+          # 3. Dialog (used by termux-tools)
+          ./build-package.sh -I -a aarch64 dialog
+          
+          # 4. Termux Tools (which provides the 'pkg' command wrapper)
+          ./build-package.sh -I -a aarch64 termux-tools
+          
+          # 5. Nano Editor
+          ./build-package.sh -I -a aarch64 nano
+
+      - name: Sanitize Artifact Filenames
+        if: success()
+        run: |
+          # Find any .deb file with a colon and replace it using standard 'tr'
+          for f in output/*:*.deb; do
+            if [ -e "$f" ]; then
+              new_name=$(echo "$f" | tr ':' '_')
+              mv "$f" "$new_name"
+            fi
+          done
+
+      - name: The Autopsy (Catch the Crash)
+        if: failure()
+        run: |
+          echo "========== CONFIG.LOG AUTOPSY START =========="
+          find /home/builder/.termux-build/ -name "config.log" -exec cat {} +
+          echo "========== CONFIG.LOG AUTOPSY END =========="
+
+      - name: Upload Essentials Artifacts
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cl-andro-essentials
+          path: output/*.deb

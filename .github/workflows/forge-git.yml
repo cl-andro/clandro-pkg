@@ -1,0 +1,74 @@
+name: Forge Git (Surgical Strike)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-git:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/termux/package-builder:latest
+      options: --privileged
+    steps:
+      - name: Checkout Sovereign Code
+        uses: actions/checkout@v4
+
+      - name: Architect the Custom OS Directories
+        run: |
+          sudo mkdir -p /data/data/com.zk.clandro/files/usr
+          sudo chown -R builder:builder /data/data/com.zk.clandro
+
+      - name: Install NDK
+        run: |
+          export HOME=/home/builder
+          ./scripts/setup-android-sdk.sh
+
+      - name: Forge Bedrock & Git
+        run: |
+          export HOME=/home/builder
+          
+          # 1. The C Bedrock
+          ./build-package.sh -I -a aarch64 ndk-sysroot
+          ./build-package.sh -I -a aarch64 libandroid-support
+          ./build-package.sh -I -a aarch64 libiconv
+          
+          # 2. Network & Crypto Bedrock (The Complete Modern Chain)
+          ./build-package.sh -I -a aarch64 ca-certificates
+          ./build-package.sh -I -a aarch64 zlib
+          ./build-package.sh -I -a aarch64 openssl
+          ./build-package.sh -I -a aarch64 libssh2
+          ./build-package.sh -I -a aarch64 libnghttp2
+          ./build-package.sh -I -a aarch64 libngtcp2
+          ./build-package.sh -I -a aarch64 libnghttp3
+          ./build-package.sh -I -a aarch64 libcurl
+          
+          # 3. Text Processing Bedrock
+          ./build-package.sh -I -a aarch64 pcre2
+          
+          # 4. Forge Git
+          ./build-package.sh -I -a aarch64 git
+
+      - name: Sanitize Artifact Filenames
+        if: success()
+        run: |
+          # Find any .deb file with a colon and replace it using standard 'tr'
+          for f in output/*:*.deb; do
+            if [ -e "$f" ]; then
+              new_name=$(echo "$f" | tr ':' '_')
+              mv "$f" "$new_name"
+            fi
+          done
+
+      - name: The Autopsy (Catch the Crash)
+        if: failure()
+        run: |
+          echo "========== CONFIG.LOG AUTOPSY START =========="
+          find /home/builder/.termux-build/ -name "config.log" -exec cat {} +
+          echo "========== CONFIG.LOG AUTOPSY END =========="
+
+      - name: Upload Artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cl-andro-git
+          path: output/*.deb
