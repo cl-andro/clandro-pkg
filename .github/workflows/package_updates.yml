@@ -4,7 +4,7 @@ on:
   push:
     branches:
     - '**'
-    - '!master'
+    - '!main'
     paths:
     - 'packages/**'
     - 'root-packages/**'
@@ -40,8 +40,8 @@ jobs:
       - name: Gather build summary
         run: |
           BASE_REF="${{ github.event.pull_request.base.ref }}"
-          git fetch origin "${BASE_REF:-master}" 2>/dev/null
-          BASE_COMMIT="$(git merge-base "origin/${BASE_REF:-master}" "HEAD")"
+          git fetch origin "${BASE_REF:-main}" 2>/dev/null
+          BASE_COMMIT="$(git merge-base "origin/${BASE_REF:-main}" "HEAD")"
           # We are intentionally not using .commits[0].id and .commits[-1].id as github seems to
           # only send 20 commits in the payload for github action runs instead of the 2048 documented
           # limit. Perhaps 2048 is the limit just for webhooks, where they haven't documented
@@ -52,11 +52,11 @@ jobs:
           HEAD_COMMIT="${{ github.event.after }}"
           if [ -z "${{ github.event.pull_request.base.sha }}" ]; then
             if ! git log "$OLD_COMMIT" > /dev/null; then
-              if [ "$(git branch --show-current)" = "master" ]; then
-                echo "Force push detected on master branch. Unable to proceed."
+              if [ "$(git branch --show-current)" = "main" ]; then
+                echo "Force push detected on main branch. Unable to proceed."
                 exit 1
               else
-                OLD_COMMIT=$(git fetch origin master >&2; git merge-base origin/master $HEAD_COMMIT)
+                OLD_COMMIT=$(git fetch origin main >&2; git merge-base origin/main $HEAD_COMMIT)
               fi
             fi
             echo "Processing commit range: ${OLD_COMMIT}..${HEAD_COMMIT}"
@@ -150,5 +150,5 @@ jobs:
             -H "Accept: application/vnd.github.v3+json" \
             -H "Authorization: Bearer ${{ secrets.TERMUXBOT2_TOKEN }}" \
             -X POST \
-            --data '{"ref":"master"}' \
+            --data '{"ref":"main"}' \
             "https://api.github.com/repos/termux/repology-metadata/actions/workflows/repology_metadata.yml/dispatches"
