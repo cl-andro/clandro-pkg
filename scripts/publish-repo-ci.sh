@@ -82,13 +82,16 @@ for f in main/binary-aarch64/Packages main/binary-aarch64/Packages.gz; do
 done
 
 # 6. Sign Release file
-if gpg --list-keys zkalamgir@proton.me >/dev/null 2>&1; then
-    echo "Signing Release files with GPG..."
-    gpg --batch --default-key zkalamgir@proton.me --clearsign --digest-algo SHA256 --yes --output dists/stable/InRelease dists/stable/Release
-    gpg --batch --default-key zkalamgir@proton.me --detach-sign --armor --digest-algo SHA256 --yes --output dists/stable/Release.gpg dists/stable/Release
+# Automatically detect the GPG key ID from the imported keyring
+GPG_KEY_ID=$(gpg --list-secret-keys --with-colons | grep '^sec' | head -n 1 | cut -d: -f5)
+
+if [ -n "$GPG_KEY_ID" ]; then
+    echo "Signing Release files with GPG Key: $GPG_KEY_ID..."
+    gpg --batch --default-key "$GPG_KEY_ID" --clearsign --digest-algo SHA256 --yes --output dists/stable/InRelease dists/stable/Release
+    gpg --batch --default-key "$GPG_KEY_ID" --detach-sign --armor --digest-algo SHA256 --yes --output dists/stable/Release.gpg dists/stable/Release
     echo "Successfully signed repository."
 else
-    echo "⚠️  Skipping signing: zkalamgir@proton.me key not found in GPG keyring."
+    echo "⚠️  Skipping signing: No private key found in GPG keyring."
 fi
 
 # 7. Commit and Push to cl-andro-packages
