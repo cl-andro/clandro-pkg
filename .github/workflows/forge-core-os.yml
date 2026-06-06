@@ -104,3 +104,11 @@ jobs:
         with:
           name: cl-andro-core-debs-aarch64
           path: output/
+
+      - name: Publish & Sign Packages
+        if: success()
+        env:
+          CL_ANDRO_PAT: ${{ secrets.CL_ANDRO_PAT }}
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+        run: |
+          ./scripts/publish-repo-ci.sh

@@ -75,7 +75,7 @@ termux_step_pre_configure() {
 termux_step_post_make_install() {
 	{
 		echo "# The main cl-andro repository"
-		echo "deb [trusted=yes] https://cl-andro.github.io/cl-andro-packages/ stable main"
+		echo "deb [signed-by=/data/data/com.zk.clandro/files/usr/etc/apt/trusted.gpg.d/cl-andro.gpg] https://cl-andro.github.io/cl-andro-packages/ stable main"
 	} > $TERMUX_PREFIX/etc/apt/sources.list
 
 	# apt-transport-tor
