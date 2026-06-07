@@ -80,10 +80,12 @@ jobs:
           ./build-package.sh -I -a aarch64 psmisc
           ./build-package.sh -I -a aarch64 util-linux
           
-          # 6. Dialog, Termux Tools & Nano
+          # 6. Dialog, Termux Tools, Nano, Keyring & Diffutils
           ./build-package.sh -I -a aarch64 dialog
           ./build-package.sh -I -a aarch64 termux-tools
           ./build-package.sh -I -a aarch64 nano
+          ./build-package.sh -I -a aarch64 termux-keyring
+          ./build-package.sh -I -a aarch64 diffutils
 
       - name: Sanitize Artifact Filenames
         if: success()

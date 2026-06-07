@@ -452,11 +452,11 @@ for package_arch in "${TERMUX_ARCHITECTURES[@]}"; do
 	# Core utilities.
 	pull_package bash # Used by `termux-bootstrap-second-stage.sh`
 	pull_package bzip2
-	if ! ${BOOTSTRAP_ANDROID10_COMPATIBLE}; then
-		pull_package command-not-found
-	else
-		pull_package proot
-	fi
+	# if ! ${BOOTSTRAP_ANDROID10_COMPATIBLE}; then
+	# 	pull_package command-not-found
+	# else
+	# 	pull_package proot
+	# fi
 	pull_package coreutils
 	pull_package curl
 	pull_package dash
@@ -466,8 +466,8 @@ for package_arch in "${TERMUX_ARCHITECTURES[@]}"; do
 	pull_package grep
 	pull_package gzip
 	pull_package less
-	pull_package procps
-	pull_package psmisc
+	# pull_package procps
+	# pull_package psmisc
 	pull_package sed
 	pull_package tar
 	pull_package termux-core
@@ -478,17 +478,17 @@ for package_arch in "${TERMUX_ARCHITECTURES[@]}"; do
 	pull_package xz-utils
 
 	# Additional.
-	pull_package ed
-	if [ ${TERMUX_PACKAGE_MANAGER} = "apt" ]; then
-		pull_package debianutils
-	fi
-	pull_package dos2unix
-	pull_package inetutils
-	pull_package lsof
-	pull_package nano
-	pull_package net-tools
-	pull_package patch
-	pull_package unzip
+	# pull_package ed
+	# if [ ${TERMUX_PACKAGE_MANAGER} = "apt" ]; then
+	# 	pull_package debianutils
+	# fi
+	# pull_package dos2unix
+	# pull_package inetutils
+	# pull_package lsof
+	# pull_package nano
+	# pull_package net-tools
+	# pull_package patch
+	# pull_package unzip
 
 	# Handle additional packages.
 	for add_pkg in "${ADDITIONAL_PACKAGES[@]}"; do
