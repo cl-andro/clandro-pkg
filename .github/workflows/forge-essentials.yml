@@ -82,7 +82,7 @@ jobs:
           
           # 6. Dialog, Termux Tools, Nano, Keyring & Diffutils
           ./build-package.sh -f -I -a aarch64 dialog
-          ./build-package.sh -I -a aarch64 termux-tools
+          ./build-package.sh -f -I -a aarch64 termux-tools
           ./build-package.sh -I -a aarch64 nano
           ./build-package.sh -I -a aarch64 termux-keyring
           ./build-package.sh -f -I -a aarch64 diffutils
