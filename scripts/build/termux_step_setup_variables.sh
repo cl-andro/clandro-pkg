@@ -105,6 +105,10 @@ termux_step_setup_variables() {
 
 	export prefix=${TERMUX_PREFIX}
 	export PREFIX=${TERMUX_PREFIX}
+	export TERMUX_PREFIX=${TERMUX_PREFIX}
+	export TERMUX_APP_PACKAGE=${TERMUX_APP_PACKAGE}
+	export TERMUX_BASE_DIR=${TERMUX_BASE_DIR}
+	export TERMUX_CACHE_DIR=${TERMUX_CACHE_DIR}
 
 	# Explicitly export in case the default was set.
 	export TERMUX_ARCH=${TERMUX_ARCH}
