@@ -16,6 +16,15 @@ PROMPT_DIRTRIM=2
 # This allows users to override $PS1 by passing it to the invocation of bash as an environment variable
 [[ "$PS1" == '\s-\v\$ ' ]] && PS1='\[\e[0;32m\]\w\[\e[0m\] \[\e[0;97m\]\$\[\e[0m\] '
 
+# cl-andro prompt: shows ~ for home, ~/dir for subdirs, full path otherwise.
+# Uses only bash builtins (cd, pwd -P) — no external commands.
+# pwd -P resolves /data/data <-> /data/user/0 symlinks on Android.
+# PROMPT_COMMAND runs after this file and overrides PS1 on every prompt.
+# NOTE: the ~ in the replacement operand of ${var/pattern/replacement} MUST be
+# escaped (\~) — otherwise bash applies tilde expansion to it and replaces the
+# prefix with the literal $HOME path, defeating the whole purpose.
+PROMPT_COMMAND='_cl_h=$(cd "$HOME" 2>/dev/null && pwd -P); _cl_p=$(pwd -P); _cl_p="${_cl_p/#$_cl_h/\~}"; PS1="\[\e[0;32m\]${_cl_p}\[\e[0m\] \[\e[0;97m\]\$\[\e[0m\] "'
+
 # Handles nonexistent commands.
 # If user has entered command which invokes non-available
 # utility, command-not-found will give a package suggestions.
