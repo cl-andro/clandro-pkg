@@ -202,11 +202,14 @@ if ! $SUDO docker container inspect $CONTAINER_NAME > /dev/null 2>&1; then
 		$TERMUX_BUILDER_IMAGE_NAME
 	__change_builder_uid_gid
 	__change_container_pid_max
+	echo "Setting up custom cl-andro directories in container..."
+	$SUDO docker exec $CONTAINER_NAME sh -c "mkdir -p /data/data/com.zk.clandro/files/usr /data/data/com.zk.clandro/files/home && chown -R builder:builder /data/data/com.zk.clandro"
 fi
 
 if [[ "$($SUDO docker container inspect -f '{{ .State.Running }}' $CONTAINER_NAME)" == "false" ]]; then
 	$SUDO docker start $CONTAINER_NAME >/dev/null 2>&1
 	__change_container_pid_max
+	$SUDO docker exec $CONTAINER_NAME sh -c "mkdir -p /data/data/com.zk.clandro/files/usr /data/data/com.zk.clandro/files/home && chown -R builder:builder /data/data/com.zk.clandro"
 fi
 
 load_apparmor_profile ./scripts/profile-restricted.apparmor "Loading restricted AppArmor profile"
