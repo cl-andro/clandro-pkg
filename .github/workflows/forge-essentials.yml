@@ -30,6 +30,7 @@ jobs:
           
           # 1. Base Bedrock & Libraries
           ./build-package.sh -I -a aarch64 ndk-sysroot
+          ./build-package.sh -I -a aarch64 libc++
           ./build-package.sh -I -a aarch64 libandroid-support
           ./build-package.sh -I -a aarch64 libandroid-glob
           ./build-package.sh -I -a aarch64 libbz2
@@ -58,12 +59,16 @@ jobs:
           ./build-package.sh -I -a aarch64 brotli
           ./build-package.sh -I -a aarch64 libngtcp2
           ./build-package.sh -I -a aarch64 libcurl
+          ./build-package.sh -I -a aarch64 gnupg
+          ./build-package.sh -I -a aarch64 resolv-conf
           
           # 4. Termux Core Bedrock
           ./build-package.sh -I -a aarch64 termux-core
           ./build-package.sh -I -a aarch64 termux-exec
           ./build-package.sh -I -a aarch64 termux-am
           ./build-package.sh -I -a aarch64 termux-am-socket
+          ./build-package.sh -I -a aarch64 dpkg
+          ./build-package.sh -I -a aarch64 apt
           
           # 5. Core POSIX Utilities
           ./build-package.sh -I -a aarch64 dash
