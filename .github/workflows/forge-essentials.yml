@@ -27,79 +27,81 @@ jobs:
       - name: Forge Essentials (Surgical Execution)
         run: |
           export HOME=/home/builder
-          
+
           # 1. Base Bedrock & Libraries
-          ./build-package.sh -I -a aarch64 ndk-sysroot
-          ./build-package.sh -I -a aarch64 libc++
-          ./build-package.sh -I -a aarch64 libandroid-support
-          ./build-package.sh -I -a aarch64 libandroid-glob
-          ./build-package.sh -I -a aarch64 libbz2
-          ./build-package.sh -I -a aarch64 liblzma
-          ./build-package.sh -I -a aarch64 libmd
-          ./build-package.sh -I -a aarch64 libandroid-posix-semaphore
-          ./build-package.sh -I -a aarch64 libgmp
-          ./build-package.sh -I -a aarch64 libmpfr
-          ./build-package.sh -I -a aarch64 pcre2
-          ./build-package.sh -I -a aarch64 libandroid-selinux
-          ./build-package.sh -I -a aarch64 libcap-ng
-          ./build-package.sh -I -a aarch64 attr
-          
+          ./build-package.sh -a aarch64 ndk-sysroot
+          ./build-package.sh -a aarch64 libc++
+          ./build-package.sh -a aarch64 libandroid-support
+          ./build-package.sh -a aarch64 libandroid-glob
+          ./build-package.sh -a aarch64 libbz2
+          ./build-package.sh -a aarch64 liblzma
+          ./build-package.sh -a aarch64 libmd
+          ./build-package.sh -a aarch64 libandroid-posix-semaphore
+          ./build-package.sh -a aarch64 libgmp
+          ./build-package.sh -a aarch64 libmpfr
+          ./build-package.sh -a aarch64 pcre2
+          ./build-package.sh -a aarch64 libandroid-selinux
+          ./build-package.sh -a aarch64 libcap-ng
+          ./build-package.sh -a aarch64 attr
+
           # 2. Terminal UI Bedrock
-          ./build-package.sh -I -a aarch64 libiconv
-          ./build-package.sh -I -a aarch64 ncurses
-          ./build-package.sh -I -a aarch64 readline
-          
+          ./build-package.sh -a aarch64 libiconv
+          ./build-package.sh -a aarch64 ncurses
+          ./build-package.sh -a aarch64 readline
+
           # 3. Crypto & Network Stack
-          ./build-package.sh -I -a aarch64 ca-certificates
-          ./build-package.sh -I -a aarch64 zlib
-          ./build-package.sh -I -a aarch64 openssl
-          ./build-package.sh -I -a aarch64 libssh2
-          ./build-package.sh -I -a aarch64 libnghttp2
-          ./build-package.sh -I -a aarch64 libnghttp3
-          ./build-package.sh -I -a aarch64 brotli
-          ./build-package.sh -I -a aarch64 libngtcp2
-          ./build-package.sh -I -a aarch64 libcurl
-          ./build-package.sh -I -a aarch64 libpng
-          ./build-package.sh -I -a aarch64 freetype
-          ./build-package.sh -I -a aarch64 tcl
-          ./build-package.sh -I -a aarch64 gnupg
-          ./build-package.sh -I -a aarch64 resolv-conf
-          
+          ./build-package.sh -a aarch64 ca-certificates
+          ./build-package.sh -a aarch64 zlib
+          ./build-package.sh -a aarch64 openssl
+          ./build-package.sh -a aarch64 libssh2
+          ./build-package.sh -a aarch64 libnghttp2
+          ./build-package.sh -a aarch64 libnghttp3
+          ./build-package.sh -a aarch64 brotli
+          ./build-package.sh -a aarch64 libngtcp2
+          ./build-package.sh -a aarch64 libcurl
+          ./build-package.sh -a aarch64 resolv-conf
+
           # 4. Termux Core Bedrock
-          ./build-package.sh -I -a aarch64 termux-core
-          ./build-package.sh -I -a aarch64 termux-exec
-          ./build-package.sh -I -a aarch64 termux-am
-          ./build-package.sh -I -a aarch64 termux-am-socket
-          ./build-package.sh -I -a aarch64 dpkg
-          ./build-package.sh -I -a aarch64 apt
-          
-          # 5. Core POSIX Utilities
-          ./build-package.sh -I -a aarch64 dash
-          ./build-package.sh -I -a aarch64 bash
-          ./build-package.sh -I -a aarch64 coreutils
-          ./build-package.sh -I -a aarch64 tar
-          ./build-package.sh -I -a aarch64 gzip
-          ./build-package.sh -I -a aarch64 grep
-          ./build-package.sh -I -a aarch64 sed
-          ./build-package.sh -I -a aarch64 gawk
-          ./build-package.sh -I -a aarch64 findutils
-          ./build-package.sh -I -a aarch64 diffutils
-          ./build-package.sh -I -a aarch64 less
-          ./build-package.sh -I -a aarch64 procps
-          ./build-package.sh -I -a aarch64 psmisc
-          ./build-package.sh -I -a aarch64 util-linux
-          
-          # 6. Dialog, Termux Tools, Nano, Keyring & Diffutils
-          ./build-package.sh -f -I -a aarch64 dialog
-          ./build-package.sh -f -I -a aarch64 termux-tools
-          ./build-package.sh -I -a aarch64 nano
-          ./build-package.sh -I -a aarch64 termux-keyring
-          ./build-package.sh -f -I -a aarch64 diffutils
+          ./build-package.sh -a aarch64 termux-core
+          ./build-package.sh -a aarch64 termux-exec
+          ./build-package.sh -a aarch64 termux-am
+          ./build-package.sh -a aarch64 termux-am-socket
+
+          # 5. APT & Package Management Dependencies
+          ./build-package.sh -a aarch64 libgpg-error
+          ./build-package.sh -a aarch64 libgcrypt
+          ./build-package.sh -a aarch64 liblz4
+          ./build-package.sh -a aarch64 xxhash
+          ./build-package.sh -a aarch64 zstd
+          ./build-package.sh -a aarch64 termux-licenses
+          ./build-package.sh -a aarch64 termux-keyring
+          ./build-package.sh -a aarch64 dpkg
+          ./build-package.sh -a aarch64 apt
+
+          # 6. Core POSIX Utilities
+          ./build-package.sh -a aarch64 dash
+          ./build-package.sh -a aarch64 bash
+          ./build-package.sh -a aarch64 coreutils
+          ./build-package.sh -a aarch64 tar
+          ./build-package.sh -a aarch64 gzip
+          ./build-package.sh -a aarch64 grep
+          ./build-package.sh -a aarch64 sed
+          ./build-package.sh -a aarch64 gawk
+          ./build-package.sh -a aarch64 findutils
+          ./build-package.sh -a aarch64 diffutils
+          ./build-package.sh -a aarch64 less
+          ./build-package.sh -a aarch64 procps
+          ./build-package.sh -a aarch64 psmisc
+          ./build-package.sh -a aarch64 util-linux
+
+          # 7. Dialog, Termux Tools, Nano
+          ./build-package.sh -f -a aarch64 dialog
+          ./build-package.sh -f -a aarch64 termux-tools
+          ./build-package.sh -a aarch64 nano
 
       - name: Sanitize Artifact Filenames
         if: success()
         run: |
-          # Find any .deb file with a colon and replace it using standard 'tr'
           for f in output/*:*.deb; do
             if [ -e "$f" ]; then
               new_name=$(echo "$f" | tr ':' '_')
