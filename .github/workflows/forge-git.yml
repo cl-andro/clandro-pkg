@@ -26,7 +26,7 @@ jobs:
       - name: Build git
         run: |
           export HOME=/home/builder
-          ./build-package.sh -I -a aarch64 git
+          ./build-package.sh -a aarch64 git
 
       - name: Sanitize filenames
         if: success()
