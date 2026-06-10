@@ -70,6 +70,8 @@ jobs:
           # 5. APT & Package Management Dependencies
           ./build-package.sh -a aarch64 libgpg-error
           ./build-package.sh -a aarch64 libgcrypt
+          ./build-package.sh -a aarch64 libassuan
+          ./build-package.sh -a aarch64 libnpth
           ./build-package.sh -a aarch64 liblz4
           ./build-package.sh -a aarch64 xxhash
           ./build-package.sh -a aarch64 zstd
@@ -77,6 +79,7 @@ jobs:
           ./build-package.sh -a aarch64 termux-keyring
           ./build-package.sh -a aarch64 dpkg
           ./build-package.sh -a aarch64 apt
+          ./build-package.sh -a aarch64 gnupg
 
           # 6. Core POSIX Utilities
           ./build-package.sh -a aarch64 dash
