@@ -30,4 +30,8 @@ termux_pkg_auto_update() {
 
 termux_step_pre_configure() {
 	autoreconf -fi
+	# Generate funcs.h (not included in GitHub release tarball)
+	local src_list
+	src_list="main.c screen.c brac.c ch.c charset.c cmdbuf.c command.c cvt.c decode.c edit.c evar.c filename.c forwback.c help.c ifile.c input.c jump.c line.c linenum.c lsystem.c mark.c optfunc.c option.c opttbl.c os.c output.c pattern.c position.c prompt.c search.c signal.c tags.c ttyin.c version.c xbuf.c"
+	(cd "${TERMUX_PKG_SRCDIR}" && grep -h '^public [^;]*$' $src_list | sed 's/$/;/' > funcs.h)
 }
