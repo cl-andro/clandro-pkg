@@ -14,6 +14,7 @@ TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
 --with-regex=pcre2
 --with-editor=editor
 "
+TERMUX_PKG_RM_AFTER_INSTALL="bin/lesskey share/man"
 TERMUX_PKG_AUTO_UPDATE=true
 # Official `less` release tags are marked with a `-rel` suffix
 TERMUX_PKG_UPDATE_VERSION_REGEXP='\d{3}(?=-rel)'
@@ -40,4 +41,8 @@ termux_step_pre_configure() {
 		src_list="main.c screen.c brac.c ch.c charset.c cmdbuf.c command.c cvt.c decode.c edit.c evar.c filename.c forwback.c help.c ifile.c input.c jump.c line.c linenum.c lsystem.c mark.c optfunc.c option.c opttbl.c os.c output.c pattern.c position.c prompt.c search.c signal.c tags.c ttyin.c version.c xbuf.c"
 		grep -h '^public [^;]*$' $src_list | sed 's/$/;/' > funcs.h
 	fi
+	# Remove .nro man page dependencies from install target (not in GitHub tarballs)
+	sed -i 's/^install: all ${srcdir}\/less\.nro ${srcdir}\/lesskey\.nro ${srcdir}\/lessecho\.nro installdirs/install: all installdirs/' Makefile.in
+	# Create stub .nro files for install (missing from GitHub tarballs)
+	touch less.nro lesskey.nro lessecho.nro
 }
