@@ -28,26 +28,26 @@ jobs:
           export HOME=/home/builder
           
           # 1. THE GLUE (Crucial for Node.js Linkage)
-          ./build-package.sh -I -a aarch64 libc++
+          ./build-package.sh  -a aarch64 libc++
           
           # 2. Bedrock Infrastructure
-          ./build-package.sh -I -a aarch64 ndk-sysroot
-          ./build-package.sh -I -a aarch64 libandroid-support
-          ./build-package.sh -I -a aarch64 libiconv
-          ./build-package.sh -I -a aarch64 zlib
-          ./build-package.sh -I -a aarch64 openssl
-          ./build-package.sh -I -a aarch64 libnghttp2
+          ./build-package.sh  -a aarch64 ndk-sysroot
+          ./build-package.sh  -a aarch64 libandroid-support
+          ./build-package.sh  -a aarch64 libiconv
+          ./build-package.sh  -a aarch64 zlib
+          ./build-package.sh  -a aarch64 openssl
+          ./build-package.sh  -a aarch64 libnghttp2
 
       - name: Forge V8 Engine Dependencies
         run: |
           export HOME=/home/builder
-          ./build-package.sh -I -a aarch64 c-ares
-          ./build-package.sh -I -a aarch64 libicu
-          ./build-package.sh -I -a aarch64 tcl
-          ./build-package.sh -I -a aarch64 ncurses
-          ./build-package.sh -I -a aarch64 readline
-          ./build-package.sh -I -a aarch64 libsqlite
-          ./build-package.sh -I -a aarch64 libuv
+          ./build-package.sh  -a aarch64 c-ares
+          ./build-package.sh  -a aarch64 libicu
+          ./build-package.sh  -a aarch64 tcl
+          ./build-package.sh  -a aarch64 ncurses
+          ./build-package.sh  -a aarch64 readline
+          ./build-package.sh  -a aarch64 libsqlite
+          ./build-package.sh  -a aarch64 libuv
 
       - name: Forge The AI Runtime (Node.js)
         run: |
@@ -61,7 +61,7 @@ jobs:
           HEARTBEAT_PID=$!
           
           # Forge Node.js
-          ./build-package.sh -I -a aarch64 nodejs
+          ./build-package.sh  -a aarch64 nodejs
           
           # Terminate heartbeat when complete
           kill $HEARTBEAT_PID
