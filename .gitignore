@@ -44,5 +44,6 @@ scripts/apt-packages-list-*.txt
 # Generated on GitHub Actions CI when building kernel modules
 /scripts/*.ko.zst
 
-# Migration guide (local reference, not committed)
+# Local reference docs (not committed)
 /migration-to-new-domain.md
+/pkg.md

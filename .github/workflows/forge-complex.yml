@@ -1,0 +1,62 @@
+name: Forge Complex (aarch64)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-complex:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/termux/package-builder:latest
+      options: --privileged
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup directories
+        run: |
+          sudo mkdir -p /data/data/com.zk.clandro/files/usr
+          sudo mkdir -p /data/data/com.zk.clandro/files/home
+          sudo chown -R builder:builder /data/data/com.zk.clandro
+
+      - name: Install NDK
+        run: |
+          export HOME=/home/builder
+          ./scripts/setup-android-sdk.sh
+
+      - name: Build imagemagick
+        run: |
+          export HOME=/home/builder
+          ./build-package.sh -a aarch64 imagemagick
+
+      - name: Build ffmpeg
+        run: |
+          export HOME=/home/builder
+          ./build-package.sh -a aarch64 ffmpeg
+
+      - name: Sanitize filenames
+        if: success()
+        run: |
+          for f in output/*:*.deb; do
+            [ -e "$f" ] && mv "$f" "$(echo "$f" | tr ':' '_')"
+          done
+
+      - name: Upload artifacts
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cl-andro-complex
+          path: output/*.deb
+
+      - name: Publish & Sign
+        if: success()
+        env:
+          CL_ANDRO_PAT: ${{ secrets.CL_ANDRO_PAT }}
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+        run: |
+          ./scripts/publish-repo-ci.sh
+
+      - name: Autopsy on failure
+        if: failure()
+        run: |
+          echo "========== CONFIG.LOG AUTOPSY =========="
+          find /home/builder/.termux-build/ -name "config.log" -exec cat {} +
