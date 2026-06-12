@@ -17,4 +17,10 @@ termux_step_make_install() {
 		TERMUX_PREFIX="$TERMUX_PREFIX" \
 		TERMUX_ANDROID_HOME="$TERMUX_ANDROID_HOME" \
 		./install.sh
+
+	# Patch: suppress id stderr for Android GIDs without /etc/group entries
+	sed -i 's/id -Gn |/id -Gn 2>\/dev\/null |/' "${TERMUX_PREFIX}/bin/proot-distro"
+
+	# Patch: prevent dpkg-reconfigure locales non-zero exit from killing install
+	sed -i 's/run_proot_cmd DEBIAN_FRONTEND=noninteractive dpkg-reconfigure locales/run_proot_cmd DEBIAN_FRONTEND=noninteractive sh -c "dpkg-reconfigure locales || true"/' "${TERMUX_PREFIX}/etc/proot-distro/debian.sh"
 }
