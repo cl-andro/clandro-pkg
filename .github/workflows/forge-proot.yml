@@ -35,10 +35,10 @@ jobs:
           ./build-package.sh -a aarch64 openssl
           ./build-package.sh -a aarch64 libnghttp2
 
-      - name: Forge PRoot & Distro Manager
+      - name: Forge PRoot Dependencies (Security, Utils, Archivers)
         run: |
           export HOME=/home/builder
-          
+
           # 1. The Core Security, Regex, & Android Hardware Layer
           ./build-package.sh -a aarch64 pcre2
           ./build-package.sh -a aarch64 attr
@@ -47,15 +47,15 @@ jobs:
           ./build-package.sh -a aarch64 libandroid-posix-semaphore
           ./build-package.sh -a aarch64 libcap-ng
           ./build-package.sh -a aarch64 libandroid-selinux
-          
+
           # 2. The Terminal & Input Engine (MUST BE BUILT BEFORE GAWK/UTILS)
           ./build-package.sh -a aarch64 ncurses
           ./build-package.sh -a aarch64 readline
-          
+
           # 3. The Core Compression Libraries
           ./build-package.sh -a aarch64 libbz2
           ./build-package.sh -a aarch64 liblzma
-          
+
           # 4. Distro Manager Prerequisites (The Master Core Utilities)
           ./build-package.sh -a aarch64 gawk
           ./build-package.sh -a aarch64 file
@@ -68,18 +68,28 @@ jobs:
           ./build-package.sh -a aarch64 libnghttp3
           ./build-package.sh -a aarch64 libngtcp2
           ./build-package.sh -a aarch64 libcurl
-          
+
           # 5. The Advanced System Foundations & Archivers
           ./build-package.sh -a aarch64 bash
           ./build-package.sh -a aarch64 libgmp
           ./build-package.sh -a aarch64 coreutils
           ./build-package.sh -a aarch64 gzip
           ./build-package.sh -a aarch64 tar
-          
-          # 6. The PRoot Engine & Manager
+
+      - name: Forge PRoot Engine & Distro Manager
+        run: |
+          export HOME=/home/builder
+
+          # Anti-Timeout: Start heartbeat to keep GitHub Actions alive
+          while true; do echo "[HEARTBEAT] Still forging the PRoot Engine... $(date)"; sleep 120; done &
+          HEARTBEAT_PID=$!
+
           ./build-package.sh -a aarch64 libtalloc
           ./build-package.sh -a aarch64 proot
           ./build-package.sh -a aarch64 proot-distro
+
+          # Terminate heartbeat when complete
+          kill $HEARTBEAT_PID
 
       - name: Sanitize Artifact Filenames
         if: success()
@@ -107,3 +117,11 @@ jobs:
         with:
           name: cl-andro-proot
           path: output/*.deb
+
+      - name: Publish & Sign Packages
+        if: success()
+        env:
+          CL_ANDRO_PAT: ${{ secrets.CL_ANDRO_PAT }}
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+        run: |
+          ./scripts/publish-repo-ci.sh
