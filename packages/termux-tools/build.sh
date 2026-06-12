@@ -3,7 +3,7 @@ TERMUX_PKG_DESCRIPTION="Basic system tools for Termux"
 TERMUX_PKG_LICENSE="GPL-3.0"
 TERMUX_PKG_MAINTAINER="@termux"
 TERMUX_PKG_VERSION="1.46.0+really1.45.0"
-TERMUX_PKG_REVISION=2
+TERMUX_PKG_REVISION=3
 TERMUX_PKG_SRCURL=https://github.com/termux/termux-tools/archive/refs/tags/v1.45.0.tar.gz
 TERMUX_PKG_SHA256=1ae29b1b875d95cc626dae323b45a2ace759969862d96094b2fa6d13bffe20d2
 TERMUX_PKG_ESSENTIAL=true
@@ -20,6 +20,14 @@ TERMUX_PKG_DEPENDS="bzip2, coreutils, curl, dash, diffutils, findutils, gawk, gr
 
 # Optional packages that are distributed as part of bootstrap archives.
 TERMUX_PKG_RECOMMENDS="ed, dos2unix, inetutils, net-tools, patch, unzip"
+
+termux_step_post_get_source() {
+	# Patch hardcoded .termux paths to .cl-andro
+	local f
+	while IFS= read -r f; do
+		sed -i 's|\.termux|.cl-andro|g; s|termux\.properties|clandro.properties|g' "$f"
+	done < <(grep -rl '\.termux' "$TERMUX_PKG_SRCDIR" --include='*.sh' --include='*.in' 2>/dev/null || true)
+}
 
 termux_step_pre_configure() {
 	autoreconf -vfi

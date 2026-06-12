@@ -843,9 +843,9 @@ TERMUX_ANDROID_HOME="$TERMUX__HOME" # Deprecated alternative variable for `TERMU
 ##
 # Termux legacy project user config directory path under `TERMUX__HOME`.
 #
-# Default value: `/data/data/com.zk.clandro/files/home/.termux`
+# Default value: `/data/data/com.zk.clandro/files/home/.cl-andro`
 ##
-TERMUX__LEGACY_PROJECT_USER_CONFIG_DIR="$TERMUX__HOME/.termux"
+TERMUX__LEGACY_PROJECT_USER_CONFIG_DIR="$TERMUX__HOME/.cl-andro"
 
 
 
