@@ -22,11 +22,21 @@ TERMUX_PKG_DEPENDS="bzip2, coreutils, curl, dash, diffutils, findutils, gawk, gr
 TERMUX_PKG_RECOMMENDS="ed, dos2unix, inetutils, net-tools, patch, unzip"
 
 termux_step_post_get_source() {
-	# Patch hardcoded .termux paths to .cl-andro
-	local f
+	# Fix chsh, login, termux-am, termux-reload-settings: simple $HOME/.termux -> .cl-andro
 	while IFS= read -r f; do
-		sed -i 's|\.termux|.cl-andro|g; s|termux\.properties|clandro.properties|g' "$f"
-	done < <(grep -rl '\.termux' "$TERMUX_PKG_SRCDIR" --include='*.sh' --include='*.in' 2>/dev/null || true)
+		sed -i 's|\.termux|.cl-andro|g' "$f"
+	done < <(grep -rl '\.termux' "$TERMUX_PKG_SRCDIR/bin/" 2>/dev/null || true)
+
+	# Fix init-termux-properties.sh: precise path replacements
+	local props="$TERMUX_PKG_SRCDIR/etc/profile.d/init-termux-properties.sh"
+	if [ -f "$props" ]; then
+		sed -i \
+			-e 's|/\.config/termux/termux\.properties|/.config/cl-andro/clandro.properties|g' \
+			-e 's|/\.termux/termux\.properties|/.cl-andro/clandro.properties|g' \
+			-e 's|mkdir -p /data/data/com\.zk\.clandro/files/home/\.termux|mkdir -p /data/data/com.zk.clandro/files/home/.cl-andro|g' \
+			-e 's|/\.termux/|/.cl-andro/clandro.properties|g' \
+			"$props"
+	fi
 }
 
 termux_step_pre_configure() {

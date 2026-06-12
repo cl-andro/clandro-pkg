@@ -4,7 +4,7 @@ TERMUX_PKG_DESCRIPTION="Android Oreo-compatible am command reimplementation"
 TERMUX_PKG_LICENSE="Apache-2.0"
 TERMUX_PKG_MAINTAINER="Michal Bednarski @michalbednarski"
 TERMUX_PKG_VERSION=0.8.0
-TERMUX_PKG_REVISION=2
+TERMUX_PKG_REVISION=3
 TERMUX_PKG_SRCURL=https://github.com/termux/TermuxAm/archive/refs/tags/v$TERMUX_PKG_VERSION.tar.gz
 TERMUX_PKG_SHA256=7d4cfa2bfff93d5fc89fc89e537d2c072e08918276b140b7ed48ea45ebfbe8f3
 TERMUX_PKG_PLATFORM_INDEPENDENT=true
@@ -15,6 +15,11 @@ _GRADLE_VERSION=8.10.2
 termux_step_post_get_source() {
 	sed -i'' -E -e "s|\@TERMUX_PREFIX\@|${TERMUX_PREFIX}|g" "$TERMUX_PKG_SRCDIR/am-libexec-packaged"
 	sed -i'' -E -e "s|\@TERMUX_APP_PACKAGE\@|${TERMUX_APP_PACKAGE}|g" "$TERMUX_PKG_SRCDIR/app/src/main/java/com/termux/termuxam/FakeContext.java"
+	# Fix hardcoded .termux paths and class name in the shell script
+	sed -i'' -E \
+		-e "s|~/\?\.termux/termux\.properties|~/.cl-andro/clandro.properties|g" \
+		-e "s|com\.termux\.termuxam\.Am|${TERMUX_APP_PACKAGE}.termuxam.Am|g" \
+		"$TERMUX_PKG_SRCDIR/am-libexec-packaged"
 }
 
 termux_step_make() {
