@@ -11,7 +11,7 @@ jobs:
       options: --privileged
     steps:
       - name: Checkout Sovereign Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Architect the Custom OS Directories
         run: |
