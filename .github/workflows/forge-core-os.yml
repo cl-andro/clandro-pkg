@@ -24,64 +24,42 @@ jobs:
           export HOME=/home/builder
           ./scripts/setup-android-sdk.sh
 
-      - name: Forge the Bedrock & Core OS (Surgical Execution)
+      - name: Forge Core Dependencies (DB, XML, Scripting)
         run: |
           export HOME=/home/builder
-          
-          # 1. Core C Bedrock
-          ./build-package.sh -a aarch64 ndk-sysroot
-          ./build-package.sh -a aarch64 libandroid-support
-          ./build-package.sh -a aarch64 libandroid-glob
-          
-          # 2. Internationalization & Terminal UI
-          ./build-package.sh -a aarch64 libiconv
-          ./build-package.sh -a aarch64 ncurses
-          ./build-package.sh -a aarch64 readline
-          
-          # 3. Forge Crypto, Compression, Hashes & Databases
-          ./build-package.sh -a aarch64 zlib
-          ./build-package.sh -a aarch64 liblzma
-          ./build-package.sh -a aarch64 libbz2
-          ./build-package.sh -a aarch64 liblz4
-          ./build-package.sh -a aarch64 zstd
-          ./build-package.sh -a aarch64 libmd
-          ./build-package.sh -a aarch64 openssl
-          ./build-package.sh -a aarch64 libgpg-error
-          ./build-package.sh -a aarch64 libgcrypt
+
+          # Database & Scripting Dependencies
           ./build-package.sh -a aarch64 libdb
-          ./build-package.sh -a aarch64 xxhash
-          
-          # 4. Forge the Python Engine & Database Tools
-          ./build-package.sh -a aarch64 libffi
           ./build-package.sh -a aarch64 tcl
           ./build-package.sh -a aarch64 libsqlite
           ./build-package.sh -a aarch64 libexpat
-          ./build-package.sh -a aarch64 libcrypt
           ./build-package.sh -a aarch64 gdbm
-          ./build-package.sh -a aarch64 libandroid-posix-semaphore
-          
-          # ARCHITECT OVERRIDE: Obliterate GUI dependencies safely (Regular Files Only)
-          rm -f packages/python/*tkinter*.sh
-          find packages -name "*fetchmailconf*" -exec rm -rf {} +
-          find packages -type f -name "*.sh" -exec sed -i 's/python-tkinter//g' {} +
-          sed -i 's/termux_error_exit "Python module library/echo "Bypassed GUI check: /g' packages/python/build.sh
-          
-          ./build-package.sh -a aarch64 python
-          
-          # 5. Forge Documentation & XML Parsers (For APT Manuals)
+
+          # XML & Documentation Parsers
           ./build-package.sh -a aarch64 libicu
           ./build-package.sh -a aarch64 libxml2
           ./build-package.sh -a aarch64 libxslt
           ./build-package.sh -a aarch64 docbook-xml
           ./build-package.sh -a aarch64 docbook-xsl
-          
-          # 6. Forge the sovereign OS tools natively
-          ./build-package.sh -a aarch64 bash
-          ./build-package.sh -a aarch64 coreutils
-          ./build-package.sh -a aarch64 dpkg
-          ./build-package.sh -a aarch64 apt
-          ./build-package.sh -a aarch64 termux-tools
-          ./build-package.sh -a aarch64 ca-certificates
+
+      - name: Forge Python Engine (The AI Language)
+        run: |
+          export HOME=/home/builder
+
+          # ARCHITECT OVERRIDE: Obliterate GUI dependencies safely (Regular Files Only)
+          rm -f packages/python/*tkinter*.sh
+          find packages -name "*fetchmailconf*" -exec rm -rf {} +
+          find packages -type f -name "*.sh" -exec sed -i 's/python-tkinter//g' {} +
+          sed -i 's/termux_error_exit "Python module library/echo "Bypassed GUI check: /g' packages/python/build.sh
+
+          # Anti-Timeout: Start heartbeat to keep GitHub Actions alive
+          while true; do echo "[HEARTBEAT] Still forging the Python Engine... $(date)"; sleep 120; done &
+          HEARTBEAT_PID=$!
+
+          ./build-package.sh -a aarch64 python
+
+          # Terminate heartbeat when complete
+          kill $HEARTBEAT_PID
 
       - name: Generate APT Index
         run: |
@@ -89,13 +67,13 @@ jobs:
           sudo apt-get update && sudo apt-get install -y dpkg-dev
           mkdir -p output
           cd output
-          
+
           # ARCHITECT OVERRIDE: Bulletproof POSIX renaming to bypass GitHub's Windows NTFS restrictions
           find . -name "*:*" -type f | while read -r file; do
             newfile=$(echo "$file" | tr ':' '_')
             mv "$file" "$newfile"
           done
-          
+
           dpkg-scanpackages -m . > Packages
           gzip -9c Packages > Packages.gz
 

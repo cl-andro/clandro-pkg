@@ -26,12 +26,28 @@ jobs:
       - name: Build imagemagick
         run: |
           export HOME=/home/builder
+
+          # Anti-Timeout: Start heartbeat to keep GitHub Actions alive
+          while true; do echo "[HEARTBEAT] Still forging imagemagick... $(date)"; sleep 120; done &
+          HEARTBEAT_PID=$!
+
           ./build-package.sh -a aarch64 imagemagick
+
+          # Terminate heartbeat when complete
+          kill $HEARTBEAT_PID
 
       - name: Build ffmpeg
         run: |
           export HOME=/home/builder
+
+          # Anti-Timeout: Start heartbeat to keep GitHub Actions alive
+          while true; do echo "[HEARTBEAT] Still forging ffmpeg... $(date)"; sleep 120; done &
+          HEARTBEAT_PID=$!
+
           ./build-package.sh -a aarch64 ffmpeg
+
+          # Terminate heartbeat when complete
+          kill $HEARTBEAT_PID
 
       - name: Sanitize filenames
         if: success()
