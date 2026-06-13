@@ -78,7 +78,7 @@ jobs:
           gzip -9c Packages > Packages.gz
 
       - name: Upload Core OS Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: cl-andro-core-debs-aarch64
           path: output/
