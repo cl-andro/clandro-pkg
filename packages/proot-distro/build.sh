@@ -21,6 +21,11 @@ termux_step_make_install() {
 	# Patch: suppress id stderr for Android GIDs without /etc/group entries
 	sed -i 's/id -Gn |/id -Gn 2>\/dev\/null |/' "${TERMUX_PREFIX}/bin/proot-distro"
 
-	# Patch: prevent dpkg-reconfigure locales non-zero exit from killing install
-	sed -i 's/run_proot_cmd DEBIAN_FRONTEND=noninteractive dpkg-reconfigure locales/run_proot_cmd DEBIAN_FRONTEND=noninteractive sh -c "dpkg-reconfigure locales || true"/' "${TERMUX_PREFIX}/etc/proot-distro/debian.sh"
+	# Patch: LD_PRELOAD restore must not return non-zero (kills install with set -e)
+	sed -i '/# Restore LD_PRELOAD after proot.$/,+1 s/\[ -n "\$TERMUX_LDPRELOAD" \] && export LD_PRELOAD="\$TERMUX_LDPRELOAD"/[ -n "\$TERMUX_LDPRELOAD" ] \&\& export LD_PRELOAD="\$TERMUX_LDPRELOAD" || true/' "${TERMUX_PREFIX}/bin/proot-distro"
+
+	# Patch: use localedef --no-archive instead of dpkg-reconfigure locales
+	# dpkg-reconfigure calls locale-gen which calls localedef without --no-archive,
+	# which tries to create locale-archive via mmap -- blocked by Android kernel.
+	sed -i 's/run_proot_cmd DEBIAN_FRONTEND=noninteractive dpkg-reconfigure locales/run_proot_cmd DEBIAN_FRONTEND=noninteractive localedef --no-archive -i en_US -f UTF-8 en_US.UTF-8/' "${TERMUX_PREFIX}/etc/proot-distro/debian.sh"
 }
