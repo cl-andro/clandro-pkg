@@ -91,6 +91,11 @@ jobs:
           # Terminate heartbeat when complete
           kill $HEARTBEAT_PID
 
+      - name: Forge Clusterctl CLI (Android Bridge Wrapper)
+        run: |
+          export HOME=/home/builder
+          ./build-package.sh -a aarch64 clusterctl
+
       - name: Sanitize Artifact Filenames
         if: success()
         run: |

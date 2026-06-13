@@ -1,0 +1,159 @@
+#!/system/bin/sh
+# clusterctl - Control Android apps via the Cluster Bridge
+# Bridge: http://127.0.0.1:8008
+
+BRIDGE="http://127.0.0.1:8008"
+CMD="${0##*/}"
+
+usage() {
+    cat <<EOF
+Usage: $CMD <command> [args]
+
+Commands:
+  status                    Show bridge and Shizuku status
+  exec <command...>         Run shell command via Shizuku
+  start <package> [uri]     Start an app (optional URI/data)
+  stop <package>            Force-stop an app
+  install <apk-path>        Install an APK
+  pm <args...>              Run 'pm' command (e.g., grant permissions)
+  am <args...>              Run 'am' command
+  input tap <x> <y>         Tap at coordinates
+  input swipe <x1> <y1> <x2> <y2>
+  input text <text>         Type text
+  input keyevent <code>     Send key event
+  settings get <ns> <key>   Read system setting
+  settings put <ns> <key> <value>
+  broadcast <action> [--pkg <pkg>] [--data <uri>]
+  help                      Show this help
+
+EOF
+}
+
+bridge_get() {
+    curl -s "$BRIDGE$1"
+}
+
+bridge_post() {
+    curl -s -X POST "$BRIDGE$1" -H "Content-Type: application/json" -d "$2"
+}
+
+status_cmd() {
+    bridge_get "/api/v1/status" | sed 's/,/\n/g; s/[{}"]//g; s/ok:true//' | grep -v "^$"
+}
+
+exec_cmd() {
+    [ $# -eq 0 ] && { echo "Usage: $CMD exec <command...>"; return 1; }
+    # Build JSON array from args
+    JSON="["
+    sep=""
+    for arg in "$@"; do
+        JSON="$JSON$sep\"$arg\""
+        sep=","
+    done
+    JSON="$JSON]"
+    bridge_post "/api/v1/exec" "{\"command\":$JSON}" | python3 -c "
+import sys,json
+try:
+    d = json.load(sys.stdin)
+    if d.get('ok'):
+        r = d['data']
+        sys.stdout.write(r.get('stdout',''))
+        sys.stderr.write(r.get('stderr',''))
+        sys.exit(r.get('exit_code',1))
+    else:
+        print('Error:', d.get('message','unknown'))
+        sys.exit(1)
+except Exception as e:
+    print('Parse error:', e)
+    sys.exit(1)
+"
+}
+
+start_cmd() {
+    local pkg="$1"
+    local uri="$2"
+    [ -z "$pkg" ] && { echo "Usage: $CMD start <package> [uri]"; return 1; }
+    if [ -n "$uri" ]; then
+        bridge_post "/api/v1/intent" "{\"action\":\"android.intent.action.VIEW\",\"package\":\"$pkg\",\"data\":\"$uri\",\"type\":\"activity\"}"
+    else
+        bridge_post "/api/v1/intent" "{\"action\":\"android.intent.action.MAIN\",\"package\":\"$pkg\",\"type\":\"activity\"}"
+    fi
+}
+
+stop_cmd() {
+    local pkg="$1"
+    [ -z "$pkg" ] && { echo "Usage: $CMD stop <package>"; return 1; }
+    exec_cmd am force-stop "$pkg"
+}
+
+install_cmd() {
+    local apk="$1"
+    [ -z "$apk" ] && { echo "Usage: $CMD install <apk-path>"; return 1; }
+    exec_cmd pm install -r "$apk"
+}
+
+pm_cmd() {
+    exec_cmd pm "$@"
+}
+
+am_cmd() {
+    exec_cmd am "$@"
+}
+
+input_cmd() {
+    local type="$1"
+    shift
+    case "$type" in
+        tap) bridge_post "/api/v1/input" "{\"type\":\"tap\",\"x\":$1,\"y\":$2}";;
+        swipe) bridge_post "/api/v1/input" "{\"type\":\"swipe\",\"x1\":$1,\"y1\":$2,\"x2\":$3,\"y2\":$4}";;
+        text) bridge_post "/api/v1/input" "{\"type\":\"text\",\"text\":\"$*\"}";;
+        keyevent) bridge_post "/api/v1/input" "{\"type\":\"keyevent\",\"keycode\":$1}";;
+        *) echo "Unknown input type: $type"; return 1;;
+    esac
+}
+
+settings_cmd() {
+    local action="$1"
+    shift
+    case "$action" in
+        get) bridge_post "/api/v1/settings" "{\"action\":\"get\",\"namespace\":\"$1\",\"key\":\"$2\"}";;
+        put) bridge_post "/api/v1/settings" "{\"action\":\"put\",\"namespace\":\"$1\",\"key\":\"$2\",\"value\":\"$3\"}";;
+        delete) bridge_post "/api/v1/settings" "{\"action\":\"delete\",\"namespace\":\"$1\",\"key\":\"$2\"}";;
+        *) echo "Usage: $CMD settings {get|put|delete} <namespace> <key> [value]"; return 1;;
+    esac
+}
+
+broadcast_cmd() {
+    local action="$1"
+    shift
+    local pkg=""
+    local data=""
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --pkg) pkg="$2"; shift 2;;
+            --data) data="$2"; shift 2;;
+            *) shift;;
+        esac
+    done
+    [ -z "$action" ] && { echo "Usage: $CMD broadcast <action> [--pkg <pkg>] [--data <uri>]"; return 1; }
+    local json="{\"action\":\"$action\",\"type\":\"broadcast\""
+    [ -n "$pkg" ] && json="$json,\"package\":\"$pkg\""
+    [ -n "$data" ] && json="$json,\"data\":\"$data\""
+    json="$json}"
+    bridge_post "/api/v1/intent" "$json"
+}
+
+case "${1:-help}" in
+    status) status_cmd;;
+    exec) shift; exec_cmd "$@";;
+    start) shift; start_cmd "$@";;
+    stop) shift; stop_cmd "$@";;
+    install) shift; install_cmd "$@";;
+    pm) shift; pm_cmd "$@";;
+    am) shift; am_cmd "$@";;
+    input) shift; input_cmd "$@";;
+    settings) shift; settings_cmd "$@";;
+    broadcast) shift; broadcast_cmd "$@";;
+    help|--help|-h) usage;;
+    *) echo "Unknown command: $1"; usage; return 1;;
+esac
